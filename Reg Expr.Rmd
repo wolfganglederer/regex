@@ -1,0 +1,643 @@
+---
+title: "Regular Expressions"
+knit: (function(inputFile, encoding) { 
+  out_dir <- "docs";
+  rmarkdown::render(inputFile,
+                      encoding=encoding, 
+                      output_file=file.path(dirname(inputFile), out_dir, 'RegEx.html'))})
+output:
+  revealjs::revealjs_presentation:
+    theme: solarized
+    transition: slide
+    center: true
+---
+
+```{r include = FALSE}
+library(stringr)
+```
+
+
+## Allgemein
+
+- Regular Expressions werden auch __regex__ oder __regexp__ genannt und sind eine formale Sprache um nach Mustern (Pattern) in Text zu suchen.
+
+- Das Konzept entsandt um 1950 und existiert in vielen verschiedenen Formen (flavours) z. B. POSIX, Perl, ... 
+
+## Warum sollte mich das interessieren?
+
+<img src="https://imgs.xkcd.com/comics/regular_expressions.png" height="500px" width="500px">
+
+## In der Arbeit
+
+Regular Expressions funktionieren in
+
+- R (grep, gsub, Paket: [stringr](http://stringr.tidyverse.org/articles/stringr.htmll)) 
+- SAS (PRXPARSE, PRXMATCH, ...) [link](http://www2.sas.com/proceedings/sugi29/265-29.pdf) [CheatSheet](https://support.sas.com/rnd/base/datastep/perl_regexp/regexp-tip-sheet.pdf)
+- Notepad++ [wiki](http://docs.notepad-plus-plus.org/index.php/Regular_Expressions)
+- WinEdt (anderer Flavour) [help](http://www.winedt.org/old/Doc/FAQ/#qd-text.manipulation.regex)
+- Visual Rules (leider nur in der File Search)
+- Kommandozeile (findstr, grep nur wenn mingw installiert ist)
+
+
+
+# Patterns
+
+## Buchstaben
+
+<br>
+
+Fast alle Zeichen werden als Pattern erkannt. Ausnahmen später!
+
+<br>
+
+sind <- ist bereits ein Pattern
+
+und erkennt 
+
+RegExp <span class="fragment highlight-red">sind</span> total praktisch
+
+## Buchstaben II
+
+<br>
+ 
+i <- Pattern
+
+erkennt
+
+RegExp s<span class="fragment highlight-red" data-fragment-index="1">i</span>nd total prak<span class="fragment highlight-red" data-fragment-index="1">i</span>sch
+
+## Buchstaben III
+
+<br>
+ 
+Buchstaben sind case sensitive
+
+r <- Pattern
+
+erkennt
+
+RegExp sind total p<span class="fragment highlight-red">r</span>aktisch
+
+## Besondere Zeichen
+ 
+ <br>
+ 
+<span style ="font-size: 100px;">
+[ \\ ^ $ . | ? * + ()
+</span>
+
+## Besondere Zeichen II
+
+<br>
+Um ein besondere Zeichen zu erkennen muss man es einfach mit einem Backslash kennzeichnen.
+
+1\\+1=2 <- Pattern
+
+erkennt
+
+Und dann schrieb ich <span class="fragment highlight-red">1+1=2</span> and die Tafel.
+
+## Besondere Buchstaben III
+
+<br>
+Manche Buchstaben können benutzt werden um Steuerzeichen darzustellen:
+
+- \\t - Tab
+- \\r - carriage return
+- \\n - line feed (newline)
+- ...
+
+## Der Punkt
+
+<br>
+
+stellt einen beliebiges Zeichen dar (ausser \\n)
+
+.i.
+
+erkennt
+
+RegExp <span class="fragment highlight-red" data-fragment-index="1">sin</span>d total prak<span class="fragment highlight-red" data-fragment-index="1">tis</span>ch
+
+# Klassen von Zeichen
+
+## Klassen von Zeichen
+
+<br>
+Eckige Klammern werden benutzt um nur eines der Zeichen in der Klammer zu matchen
+
+<br>
+
+[tr][ai]
+
+<br>
+
+RegExp sind to<span class="fragment highlight-red" data-fragment-index="1">ta</span>l p<span class="fragment highlight-red" data-fragment-index="1">ra</span>k<span class="fragment highlight-red" data-fragment-index="1">ti</span>sch
+
+## Klassen von Zeichen II
+
+<br>
+In eckigen Klammern ist - ein reserviertes Zeichen und wird benutzt um einen Bereich zu definieren 
+
+<br>
+
+[A-Ea-d]
+
+<br>
+
+Reg<span class="fragment highlight-red" data-fragment-index="1">E</span>xp sin<span class="fragment highlight-red" data-fragment-index="1">d</span> tot<span class="fragment highlight-red" data-fragment-index="1">a</span>l pr<span class="fragment highlight-red" data-fragment-index="1">a</span>ktis<span class="fragment highlight-red" data-fragment-index="1">c</span>h
+
+## Klassen von Zeichen III
+<br>
+^  innerhalb von eckigen Klammern negiert den Inhalt
+
+<br>
+
+t[^a]
+
+<br>
+
+RegExp sind <span class="fragment highlight-red" data-fragment-index="1">to</span>tal prak<span class="fragment highlight-red" data-fragment-index="1">ti</span>sch
+
+## Vordefinierte Klassen
+
+<br>
+
+- \\d - digit oder [0-9], \\D - [^\d]
+- \\w - word oder [A-Za-z0-9_] \\W - [^\w]
+- \\s - whitespace [ \\t\\r\\n] (space, tab, CR, LF) \\S - [^\s]
+
+<br>
+
+\\s\\w
+
+RegExp<span class="fragment highlight-red" data-fragment-index="1"><span class="fragment" data-fragment-index="1">\_</span>s</span>ind<span class="fragment highlight-red" data-fragment-index="1"><span class="fragment" data-fragment-index="1">\_</span>t</span>otal<span class="fragment highlight-red" data-fragment-index="1"><span class="fragment" data-fragment-index="1">\_</span>p</span>raktisch
+
+## Wiederholung
+
+Folgende Zeichen werden benutzt um vorher definierte Gruppen zu wiederholen.
+
+>- ? => 0 oder 1 mal
+>- \+ => 1 oder mehrmals
+>- \* => 0 oder mehrmals
+
+## Wiederholung II
+<br>
+
+C[LX]+
+
+1888 auf römisch: MDCC<span class="fragment highlight-red">CLXXX</span>VIII
+
+<br>
+
+C[LX]?
+
+1888 auf römisch: MD<span class="fragment highlight-red">CCCL</span>XXXVIII
+
+<br>
+
+C[LX]*
+
+1888 auf römisch: MD<span class="fragment highlight-red">CCCLXXX</span>VIII
+
+## Wiederholung III
+
+Man kann Wiederholungen auch exakt angeben
+
+- {n}: genau n
+- {n,}: n oder mehr
+- {,m}: maximal m
+- {n,m} zwischen n und m
+
+## Wiederholung IV
+
+Definiere ? * + in {n,m} Schreibweise
+
+?  <span class="fragment fade-up"> => {0,1}  </span>
+
+<br>
+
+\+ <span class="fragment fade-up"> => {1,}  </span>
+
+<br>
+
+\* <span class="fragment fade-up"> => {0,} </span>
+
+
+# Anker
+
+## ^ und \$
+
+- ^ markiert den Anfang eines Strings
+- \$ das Ende eines Strings
+
+<br>
+
+^external.*fitch$
+
+<br>
+external_rating_sp
+
+<span class="fragment highlight-red">external_rating_fitch</span>
+
+internal_letter_grade
+
+## Wortgrenzen
+
+\\b markiert eine Wortgrenze. \\B keine Wortgrenze
+
+\\bwer
+
+<span class="fragment highlight-red" data-fragment-index="1">wer</span> will ein <span class="fragment highlight-red" data-fragment-index="1">wer</span>wolf <span class="fragment highlight-red" data-fragment-index="1">wer</span>den? Verwerfen?
+
+<br>
+
+wer\\b
+
+<span class="fragment highlight-red" data-fragment-index="2">wer</span> will ein werwolf werden? Verwerfen?
+
+<br>
+
+\\Bwer
+
+wer will ein werwolf werden? Ver<span class="fragment highlight-red" data-fragment-index="3">wer</span>fen?
+
+# Auswahl
+
+## Auswahl
+
+Pipe für oder!
+
+<br>
+cat|dog
+
+A <span class="fragment highlight-red" data-fragment-index="1">cat</span> and a <span class="fragment highlight-red" data-fragment-index="1">dog</span> are expected to follow the <span class="fragment highlight-red" data-fragment-index="1">dog</span>ma that their presence with one another leads to <span class="fragment highlight-red" data-fragment-index="1">cat</span>astrophe
+
+<br>
+
+<div class="fragment fade-up" data-fragment-index="2">
+\\bcat|dog\\b
+
+A <span class="fragment highlight-red" data-fragment-index="3">cat</span> and a <span class="fragment highlight-red" data-fragment-index="3">dog</span> are expected to follow the dogma that their presence with one another leads to <span class="fragment highlight-red" data-fragment-index="3">cat</span>astrophe
+
+</div>
+
+## Auswahl II
+
+Klammern helfen!
+
+<br>
+
+<div class="fragment fade-up" data-fragment-index="1">
+
+\\b(cat|dog)\\b
+
+A <span class="fragment highlight-red" data-fragment-index="2">cat</span> and a <span class="fragment highlight-red" data-fragment-index="2">dog</span> are expected to follow the dogma that their presence with one another leads to catastrophe
+</div>
+## Eifer
+
+Die Reihenfolge bei einer Auswahl spielt eine Rolle. Es wird von vorne nach hinten abgeglichen.
+
+<br>
+<div class="fragment fade-up" data-fragment-index="1">
+and|android
+
+<br>
+A robot <span class="fragment highlight-red" data-fragment-index="2">and</span> an <span class="fragment highlight-red" data-fragment-index="2">and</span>roid fight. The ninja wins.
+</div>
+
+## Gier
+
+Es wird immer versucht so viel zu markieren wie möglich.
+
+<br>
+
+<div class="fragment fade-up" data-fragment-index="1">
+an\\S+
+
+A robot <span class="fragment highlight-red" data-fragment-index="2">and</span> an <span class="fragment highlight-red" data-fragment-index="2">android</span> fight. The ninja wins.
+</div>
+
+## Faul
+
+? verändert eine Wiederholung so, dass sie nur noch so oft angewandt wird wie nötig.
+
+<br>
+
+<div class="fragment fade-up" data-fragment-index="1">
+an\\S+?
+
+A robot <span class="fragment highlight-red" data-fragment-index="2">and</span> an <span class="fragment highlight-red" data-fragment-index="2">and</span>roid fight. The ninja wins.
+</div>
+
+# Referenzen
+
+## Rückwärtsreferenzen
+
+Klammern um eine Buchstabenauswahl schaffen eine Gruppe und können als Rückwärtsreferenzen genutzt werden.
+
+<div class="fragment fade-up" data-fragment-index="1">
+(..)\\1
+
+B<span class="fragment highlight-red" data-fragment-index="2">anan</span>e
+Kokosnuss
+</div>
+
+## Rückwärtsreferenzen II
+
+<p class="fragment shrink" data-fragment-index="1" style ="font-size: 48px;">(\\b\\S+\\b)\\s+\\b\\1\\b</p>
+
+<div class="fragment fade-up" data-fragment-index="1">
+<p class="fragment fade-up" data-fragment-index="1">
+Das ist <span class="fragment highlight-red" data-fragment-index="2">ein ein</span> dummer <span class="fragment highlight-red" data-fragment-index="2">Fehler Fehler</span>.
+</p>
+</div>
+
+<div class="fragment fade-up" data-fragment-index="3">
+In R Wortdoppelungen suchen und korrigieren.
+
+```{r}
+str_replace_all("Das ist ein ein dummer Fehler Fehler.", 
+                pattern = "(\\b\\S+\\b)\\s+\\b\\1\\b", 
+                replacement = "\\1")
+```
+
+</div>
+
+<div class="fragment fade-up" data-fragment-index="4">
+In Winedt Wortdoppelungen suchen und korrigieren. 
+(Leider eigene Notation. Ähnlich zu Delphi)
+
+\\ (+[a-z]\\)@ @>@ \\0@\{@ @>@ \\0}
+
+
+</div>
+
+
+
+## Positiver und negativer Lookahead
+
+positiv: markiert etwas, das da ist ohne es in die Auswahl mit aufzunehmen.
+
+<div class="fragment fade-up" data-fragment-index="1">
+Iron(?=man)
+
+<span class="fragment highlight-red" data-fragment-index="2">Iron</span>man Ironboy Superman
+<div>
+
+<br>
+
+<div class="fragment fade-up" data-fragment-index="3">
+negativ: erkennt etwas das nicht da ist.
+
+Iron(?!man)
+
+Ironman <span class="fragment highlight-red" data-fragment-index="4">Iron</span>boy Superman
+<div>
+## Lookbehind
+
+ist ein Lookahead nur rückwärts.
+
+<div class="fragment fade-up" data-fragment-index="1">
+(?<=Iron)man
+
+Iron<span class="fragment highlight-red" data-fragment-index="2">man</span> Ironboy Superman
+<div>
+
+<br>
+
+<div class="fragment fade-up" data-fragment-index="3">
+(?\<!Iron)man
+
+Ironman Ironboy Super<span class="fragment highlight-red" data-fragment-index="4">man</span>
+</div>
+# Praktische Beispiele
+
+## Filesystem
+
+Falls R installiert ist kann man **grep** verwenden ansonsten muss man sich mit **findstr** zufrieden geben.
+
+<br>
+
+```
+dir /s/b | findstr /r .*[Pp]roject.* > project.txt
+```
+
+## SAS
+
+Dictionary Tables erstellen
+```
+PROC SQL;
+create table columns as 
+ SELECT *
+ FROM DICTIONARY.COLUMNS
+ WHERE UPCASE(LIBNAME)="P_PUB";
+QUIT;
+```
+Variablen mit `CC` und `OVERRIDE` in belieger Reihenfolge
+
+```
+data columns2;
+set columns;
+where prxmatch("/CC.*OVERRIDE|OVERRIDE.*CC/", name);
+run;
+```
+Alle Variablen mit `ADJ` und direkt danach nicht `_COM`
+```
+data columns2;
+set columns;
+where prxmatch("/.*ADJ(?!_COM)/", name);
+run;
+```
+
+## SAS II
+
+Finde alle Kommentare die das Wort Cedulas enthalten.
+
+```
+data expert_comments;
+set T_PUB.PUB_PD_EXPERT_MODEL (keep= REVISION_ID GI_COMMENTS);
+if prxmatch("/\b[Cc][eé]dula[s]?\b/", GI_COMMENTS);
+run;
+```
+
+## R
+
+Für Latex Output \\n durch \\newline ersetzen
+
+```{r}
+str_replace_all("\n- Punkt1\n- Punkt2", "\n-"," \\\\newline -") %>% 
+  writeLines()
+```
+
+Nach Excel-Import die Spaltennamen bereiningen
+```{r eval=FALSE}
+a <- read_excel("path/to/file")
+names(a) <- str_replace_all(names(a), "[^\\w^\\d]+","_")
+```
+Es gibt aber natürlich auch 
+```{r eval=FALSE}
+make.names()
+tibble::set_tidy_names()
+```
+
+## Knobelaufgabe
+
+Externe Lettergrades
+
+<div class="fragment fade-left" data-fragment-index="1">
+<p class="fragment shrink" data-fragment-index="2" style ="font-size: 48px;">
+\\b[AaBC]{1,3}[123+-]?\\b<br>
+</p>
+<p class="fragment fade-up" data-fragment-index="2"> 
+erkennt auch z.B. Baa-, aba, ABC. RD und SD fehlen
+</p>
+</div>
+
+<br>
+<div class="fragment fade-left" data-fragment-index="3">
+Besser aber noch nicht perfekt
+<p class="fragment shrink" data-fragment-index="4" style ="font-size: 48px;">
+\\b([ABC])\\1?\\1?\\b[+-]?(?=\\s)|(\\bAaa\\b|\\bCa\\b|\\b[ABC][a]{0,2}[123]{1}\\b)|
+\\bD\\b|\\bRD\\b|\\bSD\\b
+</p>
+<p class="fragment fade-up" data-fragment-index="4">
+Erkennt noch AAA+ und Aaa1
+</p>
+</div>
+
+# Fazit
+
+## It can get messy!
+
+RegEx für Emails
+
+```
+(?:(?:\r\n)?[ \t])*(?:(?:(?:[^()<>@,;:\\".\[\] \000-\031]+(?:(?:(?:\r\n)?[ \t]
+)+|\Z|(?=[\["()<>@,;:\\".\[\]]))|"(?:[^\"\r\\]|\\.|(?:(?:\r\n)?[ \t]))*"(?:(?:
+\r\n)?[ \t])*)(?:\.(?:(?:\r\n)?[ \t])*(?:[^()<>@,;:\\".\[\] \000-\031]+(?:(?:(
+?:\r\n)?[ \t])+|\Z|(?=[\["()<>@,;:\\".\[\]]))|"(?:[^\"\r\\]|\\.|(?:(?:\r\n)?[ 
+\t]))*"(?:(?:\r\n)?[ \t])*))*@(?:(?:\r\n)?[ \t])*(?:[^()<>@,;:\\".\[\] \000-\0
+31]+(?:(?:(?:\r\n)?[ \t])+|\Z|(?=[\["()<>@,;:\\".\[\]]))|\[([^\[\]\r\\]|\\.)*\
+](?:(?:\r\n)?[ \t])*)(?:\.(?:(?:\r\n)?[ \t])*(?:[^()<>@,;:\\".\[\] \000-\031]+
+(?:(?:(?:\r\n)?[ \t])+|\Z|(?=[\["()<>@,;:\\".\[\]]))|\[([^\[\]\r\\]|\\.)*\](?:
+(?:\r\n)?[ \t])*))*|(?:[^()<>@,;:\\".\[\] \000-\031]+(?:(?:(?:\r\n)?[ \t])+|\Z
+|(?=[\["()<>@,;:\\".\[\]]))|"(?:[^\"\r\\]|\\.|(?:(?:\r\n)?[ \t]))*"(?:(?:\r\n)
+?[ \t])*)*\<(?:(?:\r\n)?[ \t])*(?:@(?:[^()<>@,;:\\".\[\] \000-\031]+(?:(?:(?:\
+r\n)?[ \t])+|\Z|(?=[\["()<>@,;:\\".\[\]]))|\[([^\[\]\r\\]|\\.)*\](?:(?:\r\n)?[
+ \t])*)(?:\.(?:(?:\r\n)?[ \t])*(?:[^()<>@,;:\\".\[\] \000-\031]+(?:(?:(?:\r\n)
+?[ \t])+|\Z|(?=[\["()<>@,;:\\".\[\]]))|\[([^\[\]\r\\]|\\.)*\](?:(?:\r\n)?[ \t]
+)*))*(?:,@(?:(?:\r\n)?[ \t])*(?:[^()<>@,;:\\".\[\] \000-\031]+(?:(?:(?:\r\n)?[
+ \t])+|\Z|(?=[\["()<>@,;:\\".\[\]]))|\[([^\[\]\r\\]|\\.)*\](?:(?:\r\n)?[ \t])*
+)(?:\.(?:(?:\r\n)?[ \t])*(?:[^()<>@,;:\\".\[\] \000-\031]+(?:(?:(?:\r\n)?[ \t]
+)+|\Z|(?=[\["()<>@,;:\\".\[\]]))|\[([^\[\]\r\\]|\\.)*\](?:(?:\r\n)?[ \t])*))*)
+*:(?:(?:\r\n)?[ \t])*)?(?:[^()<>@,;:\\".\[\] \000-\031]+(?:(?:(?:\r\n)?[ \t])+
+|\Z|(?=[\["()<>@,;:\\".\[\]]))|"(?:[^\"\r\\]|\\.|(?:(?:\r\n)?[ \t]))*"(?:(?:\r
+\n)?[ \t])*)(?:\.(?:(?:\r\n)?[ \t])*(?:[^()<>@,;:\\".\[\] \000-\031]+(?:(?:(?:
+\r\n)?[ \t])+|\Z|(?=[\["()<>@,;:\\".\[\]]))|"(?:[^\"\r\\]|\\.|(?:(?:\r\n)?[ \t
+]))*"(?:(?:\r\n)?[ \t])*))*@(?:(?:\r\n)?[ \t])*(?:[^()<>@,;:\\".\[\] \000-\031
+]+(?:(?:(?:\r\n)?[ \t])+|\Z|(?=[\["()<>@,;:\\".\[\]]))|\[([^\[\]\r\\]|\\.)*\](
+?:(?:\r\n)?[ \t])*)(?:\.(?:(?:\r\n)?[ \t])*(?:[^()<>@,;:\\".\[\] \000-\031]+(?
+:(?:(?:\r\n)?[ \t])+|\Z|(?=[\["()<>@,;:\\".\[\]]))|\[([^\[\]\r\\]|\\.)*\](?:(?
+:\r\n)?[ \t])*))*\>(?:(?:\r\n)?[ \t])*)|(?:[^()<>@,;:\\".\[\] \000-\031]+(?:(?
+:(?:\r\n)?[ \t])+|\Z|(?=[\["()<>@,;:\\".\[\]]))|"(?:[^\"\r\\]|\\.|(?:(?:\r\n)?
+[ \t]))*"(?:(?:\r\n)?[ \t])*)*:(?:(?:\r\n)?[ \t])*(?:(?:(?:[^()<>@,;:\\".\[\] 
+\000-\031]+(?:(?:(?:\r\n)?[ \t])+|\Z|(?=[\["()<>@,;:\\".\[\]]))|"(?:[^\"\r\\]|
+\\.|(?:(?:\r\n)?[ \t]))*"(?:(?:\r\n)?[ \t])*)(?:\.(?:(?:\r\n)?[ \t])*(?:[^()<>
+@,;:\\".\[\] \000-\031]+(?:(?:(?:\r\n)?[ \t])+|\Z|(?=[\["()<>@,;:\\".\[\]]))|"
+(?:[^\"\r\\]|\\.|(?:(?:\r\n)?[ \t]))*"(?:(?:\r\n)?[ \t])*))*@(?:(?:\r\n)?[ \t]
+)*(?:[^()<>@,;:\\".\[\] \000-\031]+(?:(?:(?:\r\n)?[ \t])+|\Z|(?=[\["()<>@,;:\\
+".\[\]]))|\[([^\[\]\r\\]|\\.)*\](?:(?:\r\n)?[ \t])*)(?:\.(?:(?:\r\n)?[ \t])*(?
+:[^()<>@,;:\\".\[\] \000-\031]+(?:(?:(?:\r\n)?[ \t])+|\Z|(?=[\["()<>@,;:\\".\[
+\]]))|\[([^\[\]\r\\]|\\.)*\](?:(?:\r\n)?[ \t])*))*|(?:[^()<>@,;:\\".\[\] \000-
+\031]+(?:(?:(?:\r\n)?[ \t])+|\Z|(?=[\["()<>@,;:\\".\[\]]))|"(?:[^\"\r\\]|\\.|(
+?:(?:\r\n)?[ \t]))*"(?:(?:\r\n)?[ \t])*)*\<(?:(?:\r\n)?[ \t])*(?:@(?:[^()<>@,;
+:\\".\[\] \000-\031]+(?:(?:(?:\r\n)?[ \t])+|\Z|(?=[\["()<>@,;:\\".\[\]]))|\[([
+^\[\]\r\\]|\\.)*\](?:(?:\r\n)?[ \t])*)(?:\.(?:(?:\r\n)?[ \t])*(?:[^()<>@,;:\\"
+.\[\] \000-\031]+(?:(?:(?:\r\n)?[ \t])+|\Z|(?=[\["()<>@,;:\\".\[\]]))|\[([^\[\
+]\r\\]|\\.)*\](?:(?:\r\n)?[ \t])*))*(?:,@(?:(?:\r\n)?[ \t])*(?:[^()<>@,;:\\".\
+[\] \000-\031]+(?:(?:(?:\r\n)?[ \t])+|\Z|(?=[\["()<>@,;:\\".\[\]]))|\[([^\[\]\
+r\\]|\\.)*\](?:(?:\r\n)?[ \t])*)(?:\.(?:(?:\r\n)?[ \t])*(?:[^()<>@,;:\\".\[\] 
+\000-\031]+(?:(?:(?:\r\n)?[ \t])+|\Z|(?=[\["()<>@,;:\\".\[\]]))|\[([^\[\]\r\\]
+|\\.)*\](?:(?:\r\n)?[ \t])*))*)*:(?:(?:\r\n)?[ \t])*)?(?:[^()<>@,;:\\".\[\] \0
+00-\031]+(?:(?:(?:\r\n)?[ \t])+|\Z|(?=[\["()<>@,;:\\".\[\]]))|"(?:[^\"\r\\]|\\
+.|(?:(?:\r\n)?[ \t]))*"(?:(?:\r\n)?[ \t])*)(?:\.(?:(?:\r\n)?[ \t])*(?:[^()<>@,
+;:\\".\[\] \000-\031]+(?:(?:(?:\r\n)?[ \t])+|\Z|(?=[\["()<>@,;:\\".\[\]]))|"(?
+:[^\"\r\\]|\\.|(?:(?:\r\n)?[ \t]))*"(?:(?:\r\n)?[ \t])*))*@(?:(?:\r\n)?[ \t])*
+(?:[^()<>@,;:\\".\[\] \000-\031]+(?:(?:(?:\r\n)?[ \t])+|\Z|(?=[\["()<>@,;:\\".
+\[\]]))|\[([^\[\]\r\\]|\\.)*\](?:(?:\r\n)?[ \t])*)(?:\.(?:(?:\r\n)?[ \t])*(?:[
+^()<>@,;:\\".\[\] \000-\031]+(?:(?:(?:\r\n)?[ \t])+|\Z|(?=[\["()<>@,;:\\".\[\]
+]))|\[([^\[\]\r\\]|\\.)*\](?:(?:\r\n)?[ \t])*))*\>(?:(?:\r\n)?[ \t])*)(?:,\s*(
+?:(?:[^()<>@,;:\\".\[\] \000-\031]+(?:(?:(?:\r\n)?[ \t])+|\Z|(?=[\["()<>@,;:\\
+".\[\]]))|"(?:[^\"\r\\]|\\.|(?:(?:\r\n)?[ \t]))*"(?:(?:\r\n)?[ \t])*)(?:\.(?:(
+?:\r\n)?[ \t])*(?:[^()<>@,;:\\".\[\] \000-\031]+(?:(?:(?:\r\n)?[ \t])+|\Z|(?=[
+\["()<>@,;:\\".\[\]]))|"(?:[^\"\r\\]|\\.|(?:(?:\r\n)?[ \t]))*"(?:(?:\r\n)?[ \t
+])*))*@(?:(?:\r\n)?[ \t])*(?:[^()<>@,;:\\".\[\] \000-\031]+(?:(?:(?:\r\n)?[ \t
+])+|\Z|(?=[\["()<>@,;:\\".\[\]]))|\[([^\[\]\r\\]|\\.)*\](?:(?:\r\n)?[ \t])*)(?
+:\.(?:(?:\r\n)?[ \t])*(?:[^()<>@,;:\\".\[\] \000-\031]+(?:(?:(?:\r\n)?[ \t])+|
+\Z|(?=[\["()<>@,;:\\".\[\]]))|\[([^\[\]\r\\]|\\.)*\](?:(?:\r\n)?[ \t])*))*|(?:
+[^()<>@,;:\\".\[\] \000-\031]+(?:(?:(?:\r\n)?[ \t])+|\Z|(?=[\["()<>@,;:\\".\[\
+]]))|"(?:[^\"\r\\]|\\.|(?:(?:\r\n)?[ \t]))*"(?:(?:\r\n)?[ \t])*)*\<(?:(?:\r\n)
+?[ \t])*(?:@(?:[^()<>@,;:\\".\[\] \000-\031]+(?:(?:(?:\r\n)?[ \t])+|\Z|(?=[\["
+()<>@,;:\\".\[\]]))|\[([^\[\]\r\\]|\\.)*\](?:(?:\r\n)?[ \t])*)(?:\.(?:(?:\r\n)
+?[ \t])*(?:[^()<>@,;:\\".\[\] \000-\031]+(?:(?:(?:\r\n)?[ \t])+|\Z|(?=[\["()<>
+@,;:\\".\[\]]))|\[([^\[\]\r\\]|\\.)*\](?:(?:\r\n)?[ \t])*))*(?:,@(?:(?:\r\n)?[
+ \t])*(?:[^()<>@,;:\\".\[\] \000-\031]+(?:(?:(?:\r\n)?[ \t])+|\Z|(?=[\["()<>@,
+;:\\".\[\]]))|\[([^\[\]\r\\]|\\.)*\](?:(?:\r\n)?[ \t])*)(?:\.(?:(?:\r\n)?[ \t]
+)*(?:[^()<>@,;:\\".\[\] \000-\031]+(?:(?:(?:\r\n)?[ \t])+|\Z|(?=[\["()<>@,;:\\
+".\[\]]))|\[([^\[\]\r\\]|\\.)*\](?:(?:\r\n)?[ \t])*))*)*:(?:(?:\r\n)?[ \t])*)?
+(?:[^()<>@,;:\\".\[\] \000-\031]+(?:(?:(?:\r\n)?[ \t])+|\Z|(?=[\["()<>@,;:\\".
+\[\]]))|"(?:[^\"\r\\]|\\.|(?:(?:\r\n)?[ \t]))*"(?:(?:\r\n)?[ \t])*)(?:\.(?:(?:
+\r\n)?[ \t])*(?:[^()<>@,;:\\".\[\] \000-\031]+(?:(?:(?:\r\n)?[ \t])+|\Z|(?=[\[
+"()<>@,;:\\".\[\]]))|"(?:[^\"\r\\]|\\.|(?:(?:\r\n)?[ \t]))*"(?:(?:\r\n)?[ \t])
+*))*@(?:(?:\r\n)?[ \t])*(?:[^()<>@,;:\\".\[\] \000-\031]+(?:(?:(?:\r\n)?[ \t])
++|\Z|(?=[\["()<>@,;:\\".\[\]]))|\[([^\[\]\r\\]|\\.)*\](?:(?:\r\n)?[ \t])*)(?:\
+.(?:(?:\r\n)?[ \t])*(?:[^()<>@,;:\\".\[\] \000-\031]+(?:(?:(?:\r\n)?[ \t])+|\Z
+|(?=[\["()<>@,;:\\".\[\]]))|\[([^\[\]\r\\]|\\.)*\](?:(?:\r\n)?[ \t])*))*\>(?:(
+?:\r\n)?[ \t])*))*)?;\s*)
+```
+
+<!-- Aaa	AAA	AAA -->
+<!-- Aa1	AA+	AA+	 -->
+<!-- Aa2	AA		AA -->
+<!-- Aa3	AA-	AA-	 -->
+<!-- A1		A+		A+	 -->
+<!-- A2		A		A -->
+<!-- A3		A-		A-	 -->
+<!-- Baa1	BBB+	BBB+	 -->
+<!-- Baa2	BBB	BBB	 -->
+<!-- Baa3	BBB-	BBB- -->
+<!-- Ba1	BB+	BB+ -->
+<!-- Ba2	BB		BB	 -->
+<!-- Ba3	BB-	BB- -->
+<!-- B1		B+		B+	 -->
+<!-- B2		B		B -->
+<!-- B3		B-		B-	 -->
+<!-- Caa1	CCC+	CCC -->
+<!-- Caa2	CCC	CC	 -->
+<!-- Caa3	CCC-	 -->
+<!-- Ca		CC		C	 -->
+<!-- C -->
+<!-- C	SD	/	RD	/	D	 -->
+
+<!-- Baa- -->
+
+<!-- aBa ABC ABBA -->
+<!-- Ba12 Aaa1 -->
+
+<!-- Ball -->
+<!-- Aa -->
+<!-- AA2+ -->
+<!-- Aa+ -->
+<!-- Caa -->
+
+## Two Problems
+
+Some people, when confronted with a problem, think “I know, I'll use regular expressions.”
+
+Now they have two problems.
+
+## Nützliche Links
+
+- [regexr](http://regexr.com/) zum Ausprobieren
+- [regexcrossword.com](https://regexcrossword.com/)
