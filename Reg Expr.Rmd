@@ -7,7 +7,7 @@ knit: (function(inputFile, encoding) {
                       output_file=file.path(dirname(inputFile), out_dir, 'index.html'))})
 output:
   revealjs::revealjs_presentation:
-    theme: solarized
+    theme: black
     transition: slide
     center: true
 ---
